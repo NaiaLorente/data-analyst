@@ -1,13 +1,16 @@
 # 📊 AI Data Analyst
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/NaiaLorente/ai-data-analyst/actions/workflows/ci.yml/badge.svg)](https://github.com/NaiaLorente/ai-data-analyst/actions/workflows/ci.yml)
-[![Docker build](https://github.com/NaiaLorente/ai-data-analyst/actions/workflows/docker.yml/badge.svg)](https://github.com/NaiaLorente/ai-data-analyst/actions/workflows/docker.yml)
+[![CI](https://github.com/NaiaLorente/data-analyst/actions/workflows/ci.yml/badge.svg)](https://github.com/NaiaLorente/data-analyst/actions/workflows/ci.yml)
+[![Docker build](https://github.com/NaiaLorente/data-analyst/actions/workflows/docker.yml/badge.svg)](https://github.com/NaiaLorente/data-analyst/actions/workflows/docker.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](requirements.txt)
 [![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B)](https://streamlit.io)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Live demo](https://img.shields.io/badge/Live%20demo-try%20it%20now-orange)](https://data-analyst-eezp6m5c9qcyuqcwxcklh7.streamlit.app/)
 
 **Did your numbers change? Find out why — and whether it's real — in one upload.**
+
+👉 **[Try the live demo](https://data-analyst-eezp6m5c9qcyuqcwxcklh7.streamlit.app/)** — no install, no signup, opens straight to a real dataset with real results.
 
 Upload two snapshots of similar data (this week vs. last week, this month vs. last) and get an instant, plain-English root-cause breakdown: not just "revenue dropped 12%," but *"revenue dropped 12%, driven almost entirely by a 40% collapse in the West region — and that drop is statistically significant, not noise."* Root-cause and drift-detection tools that do this (Monte Carlo, Anomalo, ThoughtSpot) are normally expensive enterprise SaaS with a data team behind them. This is the free, zero-setup version — pandas and scipy compute every number, an LLM only ever narrates them.
 
@@ -70,7 +73,7 @@ Explaining a metric move is one of the most common, most time-consuming tasks in
   - `plot_scatter` — two-variable scatter with optional colour grouping or a regression fit line
   - `plot_heatmap` — correlation heatmap
 - **Shareable reports** — export the full conversation, Auto-Insights, and What Changed (with charts) as a self-contained HTML file or Markdown, for sharing or archiving
-- **CLI / scheduled checks** — run What Changed from cron or CI (`python -m agent.cli check before.csv after.csv --fail-on-significant`), no browser or AI key needed; also usable as a drop-in GitHub Action (`uses: NaiaLorente/ai-data-analyst@main`)
+- **CLI / scheduled checks** — run What Changed from cron or CI (`python -m agent.cli check before.csv after.csv --fail-on-significant`), no browser or AI key needed; also usable as a drop-in GitHub Action (`uses: NaiaLorente/data-analyst@v1.0.0`), published on the GitHub Marketplace
 - **Streamlit UI** — clean, shareable web interface
 - **Fully local** — no backend, no telemetry; your file and your key stay in your own session
 
@@ -279,7 +282,7 @@ This repo is also a composite GitHub Action (`action.yml`), so you can drop the 
 
 ```yaml
 - name: Check for significant data drift
-  uses: NaiaLorente/ai-data-analyst@main
+  uses: NaiaLorente/data-analyst@v1.0.0
   with:
     file-a: data/last_week.csv
     file-b: data/this_week.csv
@@ -343,10 +346,14 @@ User question / second snapshot to compare
 
 ## Quick start
 
+**Fastest option: [use the live demo](https://data-analyst-eezp6m5c9qcyuqcwxcklh7.streamlit.app/)** — nothing to install, opens straight to a real dataset.
+
+To run it yourself instead:
+
 ```bash
 # 1. Clone
-git clone https://github.com/NaiaLorente/ai-data-analyst.git
-cd ai-data-analyst
+git clone https://github.com/NaiaLorente/data-analyst.git
+cd data-analyst
 
 # 2. Install dependencies
 pip install -r requirements.txt
@@ -362,15 +369,15 @@ Auto-Insights and Explore a column are always the first thing you see (**Overvie
 ### Or run it with Docker — no Python setup at all
 
 ```bash
-docker build -t ai-data-analyst .
-docker run -p 8501:8501 ai-data-analyst
+docker build -t data-analyst .
+docker run -p 8501:8501 data-analyst
 ```
 
 Then open [http://localhost:8501](http://localhost:8501). The image is built and smoke-tested on every push — see the Docker build badge above.
 
 ### Or deploy your own copy for free
 
-Fork the repo, then go to [share.streamlit.io](https://share.streamlit.io), sign in with GitHub, and pick your fork/branch/`app.py` to host a free instance on Streamlit Community Cloud. Visitors still bring their own AI key — you're only hosting the app, not paying for anyone's API usage.
+Fork the repo, then go to [share.streamlit.io](https://share.streamlit.io), sign in with GitHub, and pick your fork/branch/`app.py` to host a free instance on Streamlit Community Cloud — the same way [the live demo above](https://data-analyst-eezp6m5c9qcyuqcwxcklh7.streamlit.app/) is hosted. Visitors still bring their own AI key — you're only hosting the app, not paying for anyone's API usage.
 
 ---
 
@@ -404,7 +411,7 @@ All tests run against pure pandas/formatting logic — none of them call a live 
 ## Project structure
 
 ```
-ai-data-analyst/
+data-analyst/
 ├── app.py                  # Streamlit frontend
 ├── agent/
 │   ├── analyst.py          # Provider-agnostic agent loop (tool-use) + drift narration
