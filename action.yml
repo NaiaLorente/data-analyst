@@ -1,8 +1,5 @@
 name: "What Changed — root-cause drift check"
-description: >-
-  Compare two dataset snapshots and fail the workflow if the change is
-  statistically significant. Pure pandas/scipy — no AI key required unless
-  you opt into a narrated summary.
+description: "Compare two dataset snapshots and fail the workflow if the change is statistically significant."
 author: "Naia Lorente"
 
 branding:
