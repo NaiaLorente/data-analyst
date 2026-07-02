@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest an idea for this project
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: What are you trying to do that the app doesn't support today?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: false
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Keep in mind
+      options:
+        - label: This project never ships or proxies an API key — solutions should stay bring-your-own-key.
+        - label: The AI should never be the source of truth for a number — real computations should stay in agent/tools.py or agent/drift.py.

@@ -1,0 +1,34 @@
+name: Docker build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t ai-data-analyst:ci .
+
+      - name: Smoke test the container starts and serves traffic
+        run: |
+          docker run -d --name ai-data-analyst-ci -p 8501:8501 ai-data-analyst:ci
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8501/_stcore/health; then
+              echo "Container is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Container never became healthy"
+          docker logs ai-data-analyst-ci
+          exit 1
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f ai-data-analyst-ci || true

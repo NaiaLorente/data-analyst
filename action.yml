@@ -1,0 +1,117 @@
+name: "What Changed — root-cause drift check"
+description: >-
+  Compare two dataset snapshots and fail the workflow if the change is
+  statistically significant. Pure pandas/scipy — no AI key required unless
+  you opt into a narrated summary.
+author: "Naia Lorente"
+
+branding:
+  icon: "activity"
+  color: "orange"
+
+inputs:
+  file-a:
+    description: "Path to the 'before' snapshot (CSV/Excel/JSON/Parquet), relative to the workspace."
+    required: true
+  file-b:
+    description: "Path to the 'after' snapshot, relative to the workspace."
+    required: true
+  metric:
+    description: "Numeric column to explain. Auto-picked if omitted."
+    required: false
+  segment:
+    description: "Categorical column to break the change down by. Auto-picked if omitted."
+    required: false
+  agg:
+    description: "Aggregation for --metric: sum or mean."
+    required: false
+    default: "sum"
+  fail-on-significant:
+    description: "Fail this step if the change is statistically significant (Welch's t-test / chi-square)."
+    required: false
+    default: "true"
+  format:
+    description: "Report format: text or json."
+    required: false
+    default: "text"
+  narrate:
+    description: "Also generate a plain-English AI narration. Requires api-key."
+    required: false
+    default: "false"
+  provider:
+    description: "AI provider for narrate: anthropic, openai, gemini, groq, xai, or ollama."
+    required: false
+    default: "groq"
+  model:
+    description: "Model name for narrate. Defaults to the provider's default model."
+    required: false
+  api-key:
+    description: "API key for narrate. Pass via a GitHub secret — never commit a real key."
+    required: false
+
+outputs:
+  report:
+    description: "The drift report, in the requested format."
+    value: ${{ steps.check.outputs.report }}
+  significant:
+    description: "\"true\" if a statistically significant change was found."
+    value: ${{ steps.check.outputs.significant }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      shell: bash
+      run: pip install --no-cache-dir -r "${{ github.action_path }}/requirements-cli.txt"
+
+    - name: Run drift check
+      id: check
+      shell: bash
+      env:
+        AI_DATA_ANALYST_API_KEY: ${{ inputs.api-key }}
+        PYTHONPATH: ${{ github.action_path }}
+      run: |
+        args=(check "${{ inputs.file-a }}" "${{ inputs.file-b }}" --agg "${{ inputs.agg }}" --format "${{ inputs.format }}")
+
+        if [ -n "${{ inputs.metric }}" ]; then
+          args+=(--metric "${{ inputs.metric }}")
+        fi
+        if [ -n "${{ inputs.segment }}" ]; then
+          args+=(--segment "${{ inputs.segment }}")
+        fi
+        if [ "${{ inputs.narrate }}" = "true" ]; then
+          args+=(--narrate --provider "${{ inputs.provider }}")
+        fi
+        if [ -n "${{ inputs.model }}" ]; then
+          args+=(--model "${{ inputs.model }}")
+        fi
+        if [ "${{ inputs.fail-on-significant }}" = "true" ]; then
+          args+=(--fail-on-significant)
+        fi
+
+        set +e
+        output=$(python -m agent.cli "${args[@]}" 2>&1)
+        exit_code=$?
+        set -e
+
+        echo "$output"
+
+        delimiter="ghadelim_$(date +%s%N)"
+        {
+          echo "report<<$delimiter"
+          echo "$output"
+          echo "$delimiter"
+        } >> "$GITHUB_OUTPUT"
+
+        if [ "$exit_code" -eq 2 ]; then
+          echo "significant=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "significant=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        exit "$exit_code"
